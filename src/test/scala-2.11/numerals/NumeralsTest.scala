@@ -53,8 +53,19 @@ class NumeralsTest extends FlatSpec with Matchers {
     convertToNumeral(26) shouldBe "XXVI"
     convertToNumeral(39) shouldBe "XXXIX"
   }
-//
+
   it should "convert 40 to XL" in {
     convertToNumeral(40) shouldBe "XL"
+  }
+
+  it should "convert some special 40 values" in {
+    convertToNumeral(44) shouldBe "XLIV"
+    convertToNumeral(45) shouldBe "XLV"
+    convertToNumeral(46) shouldBe "XLVI"
+    convertToNumeral(49) shouldBe "XLIX"
+  }
+
+  it should "convert 50 to L" in {
+    convertToNumeral(50) shouldBe "L"
   }
 }
