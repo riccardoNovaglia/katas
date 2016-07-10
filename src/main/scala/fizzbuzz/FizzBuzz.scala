@@ -9,17 +9,13 @@ class FizzBuzz {
 
   def apply(value: Int): String = {
     using(value) {
-      check3 _ andThen check5 andThen check6 andThen check4
+      check3 _ andThen check5
     } orToStringIfNeither
   }
 
   def check3(fizz: FizzBuzz): FizzBuzz = fizz report "fizz" when isDivisibleBy(3)
 
   def check5(fizz: FizzBuzz): FizzBuzz = fizz report "buzz" when isDivisibleBy(5)
-
-  def check6(fizzBuzz: FizzBuzz): FizzBuzz = fizzBuzz report "burp" when isDivisibleBy(6)
-
-  def check4(fizzBuzz: FizzBuzz): FizzBuzz = fizzBuzz report "quack" when isDivisibleBy(4)
 
   def isDivisibleBy(divisor: Int): (Int) => Boolean = {
     value => value % divisor == 0
