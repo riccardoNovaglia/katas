@@ -2,27 +2,40 @@ package fizzbuzz
 
 class FizzBuzz {
 
-  implicit def intToDivisible(int: Int): IsDivisible = new IsDivisible(int)
+  var value = 0
+  var report = ""
+  var result = ""
+
 
   def apply(value: Int): String = {
-    value report "fizz" when isDivisibleBy(3) report "buzz" when isDivisibleBy(5) orToStringIfNeither
+    using(value) {
+      check3 _ andThen check5 andThen check6 andThen check4
+    } orToStringIfNeither
   }
+
+  def check3(fizz: FizzBuzz): FizzBuzz = fizz report "fizz" when isDivisibleBy(3)
+
+  def check5(fizz: FizzBuzz): FizzBuzz = fizz report "buzz" when isDivisibleBy(5)
+
+  def check6(fizzBuzz: FizzBuzz): FizzBuzz = fizzBuzz report "burp" when isDivisibleBy(6)
+
+  def check4(fizzBuzz: FizzBuzz): FizzBuzz = fizzBuzz report "quack" when isDivisibleBy(4)
 
   def isDivisibleBy(divisor: Int): (Int) => Boolean = {
     value => value % divisor == 0
   }
-}
 
-case class IsDivisible(value: Int) {
-  var report: String = _
-  var result: String = ""
+  def using(aValue: Int)(fn: (FizzBuzz) => FizzBuzz) = {
+    value = aValue
+    fn(this)
+  }
 
-  def report(toReport: String): IsDivisible = {
+  def report(toReport: String): FizzBuzz = {
     report = toReport
     this
   }
 
-  def when(test: (Int) => Boolean): IsDivisible = {
+  def when(test: (Int) => Boolean): FizzBuzz = {
     if (test(value)) {
       result += report
     }
