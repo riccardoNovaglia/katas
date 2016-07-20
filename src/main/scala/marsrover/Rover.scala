@@ -1,6 +1,18 @@
 package marsrover
 
-case class Rover(val coordinates: (Int, Int), val direction: Direction) {
+case class Rover(val coordinates: (Int, Int), val direction: Direction, val border: (Int, Int) = (3, 3)) {
+  val state = {
+    if (isCrashed())
+      "Crashed"
+    else
+      "Alive"
+  }
+
+
+  def isCrashed(): Boolean = {
+    (Math.abs(coordinates._1) > border._1 || Math.abs(coordinates._2) > border._2)
+  }
+
 
   private implicit def coordToXY(coord: (Int, Int)): XY = new XY(coord)
 
@@ -17,13 +29,13 @@ case class Rover(val coordinates: (Int, Int), val direction: Direction) {
 
   def run(command: Char): Rover = {
     if (command == 'r') {
-      new Rover(coordinates, direction.right)
+      new Rover(coordinates, direction.right, border)
     } else if (command == 'l') {
-      new Rover(coordinates, direction.left)
+      new Rover(coordinates, direction.left, border)
     } else if (command == 'f') {
-      new Rover(coordinates + direction.forward, direction)
+      new Rover(coordinates + direction.forward, direction, border)
     } else {
-      new Rover(coordinates - direction.forward, direction)
+      new Rover(coordinates - direction.forward, direction, border)
     }
   }
 }
