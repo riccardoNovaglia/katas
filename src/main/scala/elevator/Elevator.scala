@@ -1,11 +1,18 @@
 package elevator
 
 protected class Elevator(val currentFloor: Int, val destinations: List[Int], val state: ElevatorState) extends TimedEntity {
-  def goTo(floor: Int): Elevator = {
+  protected def goTo(floor: Int): Elevator = {
     Elevator(currentFloor, destinations :+ floor)
   }
 
-  def callAt(floor: Int): Elevator = Elevator(currentFloor, destinations :+ floor)
+  protected def callAt(floor: Int): Elevator = {
+    if (destinations.nonEmpty) {
+      if (Range(currentFloor, destinations.head).inclusive.contains(floor)) {
+        return Elevator(currentFloor, floor :: destinations)
+      }
+    }
+    Elevator(currentFloor, destinations :+ floor)
+  }
 
   override def executeAction(): Elevator = {
     if (atTheRightFloor()) {
@@ -34,9 +41,21 @@ object Elevator {
     TickerClock.add(elevator)
     elevator
   }
+
+  def callAt(floor: Int, elevator: Elevator = Elevator.apply()): Elevator = {
+    val newElevator = elevator.callAt(floor)
+    TickerClock.add(newElevator)
+    newElevator
+  }
+
+  def goTo(floor: Int, elevator: Elevator = Elevator.apply()): Elevator = {
+    Elevator(elevator.currentFloor, elevator.destinations :+ floor, elevator.state)
+  }
 }
 
-trait ElevatorState
+trait ElevatorState {
+  override def toString: String = this.getClass.getName
+}
 
 object CLOSED extends ElevatorState
 
