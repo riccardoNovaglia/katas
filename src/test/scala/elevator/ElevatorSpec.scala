@@ -31,10 +31,21 @@ class ElevatorSpec extends FlatSpec with Matchers {
     shouldNowBeAtFloor(-1)
   }
 
-  it should "serve one request at a time" in {
+  it should "start closed" in {
+    Elevator().state should be(CLOSED)
+  }
+
+  it should "open the doors when it's called at its current floor and the clock ticks" in {
+    Elevator().callAt(0).state should be(CLOSED)
+    shouldNowBe(OPEN)
+  }
+
+  it should "serve one request at a time and let people off when it reaches its destination" in {
     Elevator().goTo(2).goTo(0)
     shouldNowBeAtFloor(1)
     shouldNowBeAtFloor(2)
+    shouldNowBe(OPEN)
+    shouldNowBe(CLOSED)
     shouldNowBeAtFloor(1)
     shouldNowBeAtFloor(0)
   }
@@ -43,6 +54,13 @@ class ElevatorSpec extends FlatSpec with Matchers {
     val newElevator: Elevator = TickerClock.tick().asInstanceOf[Elevator]
     withClue(s"Expected elevator to be at floor $expectedFloor but found at ${newElevator.currentFloor}") {
       newElevator.currentFloor should be(expectedFloor)
+    }
+  }
+
+  private def shouldNowBe(expectedState: ElevatorState) = {
+    val newElevator: Elevator = TickerClock.tick().asInstanceOf[Elevator]
+    withClue(s"Expected elevator to be $expectedState but is actually ${newElevator.state}") {
+      newElevator.state should be(expectedState)
     }
   }
 }
