@@ -1,8 +1,8 @@
 package elevator
 
-import org.scalatest.{FlatSpec, Matchers, OneInstancePerTest}
+import org.scalatest.{FlatSpec, Matchers}
 
-class ElevatorSpec extends FlatSpec with Matchers with OneInstancePerTest {
+class ElevatorSpec extends FlatSpec with Matchers {
 
   //  These are some features. They can be implemented in any order you prefer.
   //    * an elevator responds to calls containing a source floor and direction
@@ -11,31 +11,28 @@ class ElevatorSpec extends FlatSpec with Matchers with OneInstancePerTest {
   //    * you may implement direction arrows
   //    * you may implement doors (opening and closing)
   //    * there can be more than one elevator
-  val elevator = Elevator()
-
   "An Elevator" should "start at ground floor" in {
-    elevator.currentFloor should be(0)
+    Elevator().currentFloor should be(0)
   }
 
   it should "only move when the clock ticks" in {
-    elevator.currentFloor should be(0)
-    elevator.goTo(1).currentFloor should be(0)
+    Elevator().goTo(1).currentFloor should be(0)
     shouldNowBeAtFloor(1)
   }
 
   it should "move one floor at a time" in {
-    elevator.goTo(2)
+    Elevator().goTo(2)
     shouldNowBeAtFloor(1)
     shouldNowBeAtFloor(2)
   }
 
   it should "be able to go down floors" in {
-    elevator.goTo(-1)
+    Elevator().goTo(-1)
     shouldNowBeAtFloor(-1)
   }
 
   it should "serve one request at a time" in {
-    elevator.goTo(2).goTo(0)
+    Elevator().goTo(2).goTo(0)
     shouldNowBeAtFloor(1)
     shouldNowBeAtFloor(2)
     shouldNowBeAtFloor(1)
@@ -43,9 +40,9 @@ class ElevatorSpec extends FlatSpec with Matchers with OneInstancePerTest {
   }
 
   private def shouldNowBeAtFloor(expectedFloor: Int) = {
-    TickerClock.tick()
-    withClue(s"Expected elevator to be at floor $expectedFloor but found at ${elevator.currentFloor}") {
-      elevator.currentFloor should be(expectedFloor)
+    val newElevator: Elevator = TickerClock.tick().asInstanceOf[Elevator]
+    withClue(s"Expected elevator to be at floor $expectedFloor but found at ${newElevator.currentFloor}") {
+      newElevator.currentFloor should be(expectedFloor)
     }
   }
 }

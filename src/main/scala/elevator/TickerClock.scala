@@ -5,9 +5,9 @@ object TickerClock {
 
   def add(entity: TimedEntity): Unit = this.entity = entity
 
-  def tick(): Unit = entity.executeAction()
+  def tick(): TimedEntity = entity.executeAction()
 }
 
 trait TimedEntity {
-  def executeAction()
+  def executeAction(): TimedEntity
 }

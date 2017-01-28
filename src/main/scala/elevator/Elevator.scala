@@ -1,34 +1,31 @@
 package elevator
 
-import scala.collection.mutable.ListBuffer
-
-class Elevator(var currentFloor: Int = 0) extends TimedEntity {
-  private var destinations = ListBuffer[Int]()
-
+protected class Elevator(val currentFloor: Int, val destinations: List[Int]) extends TimedEntity {
   def goTo(floor: Int): Elevator = {
-    destinations += floor
-    this
+    Elevator(currentFloor, destinations :+ floor)
   }
 
-  override def executeAction(): Unit = {
-    if (!atTheRightFloor) {
-      currentFloor = if (destinations.head > currentFloor) currentFloor + 1 else currentFloor - 1
-      checkDestinationReached()
+  override def executeAction(): Elevator = {
+    if (!atTheRightFloor()) {
+      Elevator(move, updateDestinationsWith(move))
     } else {
-      goToNextDestinationIfThereIsOne()
+      goToNextDestinationIfThereIsOne
     }
   }
 
-  private def atTheRightFloor = destinations.isEmpty || destinations.head == currentFloor
+  private def atTheRightFloor(floor: Int = currentFloor) = destinations.isEmpty || destinations.head == floor
 
-  private def checkDestinationReached() = if (atTheRightFloor) destinations = destinations.drop(1)
+  private lazy val move = if (destinations.head > currentFloor) currentFloor + 1 else currentFloor - 1
 
-  private def goToNextDestinationIfThereIsOne() = if (destinations.nonEmpty) executeAction()
+  private def updateDestinationsWith(currently: Int) =
+    if (atTheRightFloor(currently)) destinations.drop(1) else destinations
+
+  private def goToNextDestinationIfThereIsOne: Elevator = if (destinations.nonEmpty) executeAction() else this
 }
 
 object Elevator {
-  def apply(currentFloor: Int = 0): Elevator = {
-    val elevator = new Elevator(currentFloor)
+  def apply(currentFloor: Int = 0, destinations: List[Int] = List()): Elevator = {
+    val elevator = new Elevator(currentFloor, destinations)
     TickerClock.add(elevator)
     elevator
   }
