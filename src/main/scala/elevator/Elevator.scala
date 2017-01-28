@@ -1,17 +1,12 @@
 package elevator
 
 protected class Elevator(val currentFloor: Int, val destinations: List[Int], val state: ElevatorState) extends TimedEntity {
-  protected def goTo(floor: Int): Elevator = {
-    Elevator(currentFloor, destinations :+ floor)
-  }
-
   protected def callAt(floor: Int): Elevator = {
-    if (destinations.nonEmpty) {
-      if (Range(currentFloor, destinations.head).inclusive.contains(floor)) {
-        return Elevator(currentFloor, floor :: destinations)
-      }
+    if (destinations.nonEmpty && Range(currentFloor, destinations.head).inclusive.contains(floor)) {
+      return Elevator(currentFloor, floor :: destinations)
     }
-    Elevator(currentFloor, destinations :+ floor)
+    val newDestinations = destinations :+ floor
+    Elevator(currentFloor, if (newDestinations.max < currentFloor) newDestinations.sorted.reverse else newDestinations.sorted)
   }
 
   override def executeAction(): Elevator = {
@@ -28,11 +23,13 @@ protected class Elevator(val currentFloor: Int, val destinations: List[Int], val
     if (state == OPEN) {
       Elevator(currentFloor, destinations.drop(1), CLOSED)
     } else {
-      Elevator(currentFloor, destinations, OPEN)
+      if (destinations.isEmpty) this else Elevator(currentFloor, destinations, OPEN)
     }
   }
 
   private lazy val move = if (destinations.head > currentFloor) currentFloor + 1 else currentFloor - 1
+
+  override def toString: String = s"Currently: floor [$currentFloor], doors [$state] - Destinations: [$destinations]"
 }
 
 object Elevator {
@@ -42,14 +39,10 @@ object Elevator {
     elevator
   }
 
-  def callAt(floor: Int, elevator: Elevator = Elevator.apply()): Elevator = {
-    val newElevator = elevator.callAt(floor)
+  def callAt(floor: Int): Elevator = {
+    val newElevator = TickerClock.getCurrent.asInstanceOf[Elevator].callAt(floor)
     TickerClock.add(newElevator)
     newElevator
-  }
-
-  def goTo(floor: Int, elevator: Elevator = Elevator.apply()): Elevator = {
-    Elevator(elevator.currentFloor, elevator.destinations :+ floor, elevator.state)
   }
 }
 
