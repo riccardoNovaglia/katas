@@ -29,36 +29,30 @@ class KSumSpec extends FlatSpec with Matchers {
     KSum.recsWithSet(List(1, 2, 3, 4, 5), 15) should be(false)
   }
 
-
   it should "benchmark" in {
-    println("Fastest executions: (op name, execution time in ns)")
-
-    val benchmark = sortedNamesTimes(
+    val namesAndTimes = sortedNamesTimesGen[List[Int], Int, Boolean](
+      (1 to 1000).toList, 1000) {
       Map(
         "Fors" -> KSum.fors,
         "Recursion with set" -> KSum.recsWithSet,
-        "Recursion without set" -> KSum.fors,
-        "Fold with set" -> KSum.fors,
-        "Fold no set" -> KSum.fors
-      ),
-      ((1 to 1000).toList, 10000))
+        "Recursion without set" -> KSum.recs,
+        "Fold with set" -> KSum.foldingWithSet,
+        "Fold no set" -> KSum.folding
+      )
+    }
 
-    println(benchmark)
+    println(namesAndTimes.foreach((nameAndTime: (String, Long)) => println(nameAndTime._1, nameAndTime._2)))
   }
 
-  private def sortedNamesTimes(ops: Map[String, (List[Int], Int) => Boolean], args: (List[Int], Int)): List[(String, Long)] = {
-    val nameAndTime = ops.map(
-      (op: (String, (List[Int], Int) => Boolean)) =>
-        (
-          op._1,
-          execTimeFor(op._1)(op._2(args._1, args._2))
-        )
-    )
+  private def sortedNamesTimesGen[ARG1, ARG2, RETURN](arg1: ARG1, arg2: ARG2)(ops: Map[String, (ARG1, ARG2) => RETURN]): List[(String, Long)] = {
+    val nameAndTime = ops.map {
+      case (functionName, function) => (functionName, execTime(function(arg1, arg2)))
+    }
 
     nameAndTime.toList.sortWith((first, second) => first._2.compareTo(second._2) < 0)
   }
 
-  private def execTimeFor[T](opName: String)(op: => T): Long = {
+  private def execTime[T](op: => T): Long = {
     val start = System.nanoTime()
     op
     System.nanoTime() - start
